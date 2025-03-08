@@ -1,4 +1,27 @@
-﻿
+/*
+ * Copyright (c) 2024-2025 XDay
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+
 using System;
 using System.Diagnostics;
 
@@ -32,22 +55,22 @@ namespace XDay
 
         public byte[] Encode(object protocal)
         {
-            var stream = m_StreamPool.Get();
+            var stream = GetStream();
             m_ProtocalStage.Encode(protocal, stream);
             stream.Position = 0;
 
-            var compressedStream = m_StreamPool.Get();
+            var compressedStream = GetStream();
             m_CompressionStage.Compress(stream, compressedStream);
-            m_StreamPool.Release(stream);
+            ReleaseStream(stream);
             stream = compressedStream;
 
-            var encryptedStream = m_StreamPool.Get();
+            var encryptedStream = GetStream();
             m_EncryptionStage.Encrypt(stream, encryptedStream);
-            m_StreamPool.Release(stream);
+            ReleaseStream(stream);
 
             var buffer = new byte[encryptedStream.Length];
             Buffer.BlockCopy(encryptedStream.Buffer, 0, buffer, 0, (int)encryptedStream.Length);
-            m_StreamPool.Release(encryptedStream);
+            ReleaseStream(encryptedStream);
             return buffer;
         }
 
@@ -55,23 +78,23 @@ namespace XDay
         {
             try
             {
-                var encryptedStream = m_StreamPool.Get();
+                var encryptedStream = GetStream();
                 encryptedStream.Write(data, offset, count);
 
-                var compressedStream = m_StreamPool.Get();
+                var compressedStream = GetStream();
                 m_EncryptionStage.Decrypt(encryptedStream, compressedStream);
-                m_StreamPool.Release(encryptedStream);
+                ReleaseStream(encryptedStream);
 
                 var protocalStream = compressedStream;
                 if (m_CompressionStage != null)
                 {
-                    protocalStream = m_StreamPool.Get();
+                    protocalStream = GetStream();
                     m_CompressionStage.Decompress(compressedStream, protocalStream);
-                    m_StreamPool.Release(compressedStream);
+                    ReleaseStream(compressedStream);
                 }
 
                 var protocal = m_ProtocalStage.Decode(protocalStream);
-                m_StreamPool.Release(protocalStream);
+                ReleaseStream(protocalStream);
 
                 return protocal;
             }
@@ -81,6 +104,16 @@ namespace XDay
             }
 
             return null;
+        }
+
+        private ByteStream GetStream()
+        {
+            return m_StreamPool.Get();
+        }
+
+        private void ReleaseStream(ByteStream stream)
+        {
+            m_StreamPool.Release(stream);
         }
 
         private readonly IEncryptionStage m_EncryptionStage;

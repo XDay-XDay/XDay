@@ -23,19 +23,59 @@
 
 
 using Cysharp.Text;
+using System;
 
 namespace XDay
 {
     internal class UnityConsoleLogReceiver : LogReceiver
     {
-        public override void OnLogReceived(Utf16ValueStringBuilder builder, LogType type, bool fromUnityDebug)
+        public override void OnLogReceived(Utf16ValueStringBuilder builder, LogType type, LogColor color, bool fromUnityDebug)
         {
             if (!fromUnityDebug)
             {
                 if (type == LogType.Log)
                 {
 #if PLATFORM_UNITY
-                    UnityEngine.Debug.Log(builder.ToString());
+                    if (color == LogColor.None)
+                    {
+                        UnityEngine.Debug.Log(builder.ToString());
+                    }
+                    else
+                    {
+
+                        Utf16ValueStringBuilder full = ZString.CreateStringBuilder();
+                        switch (color)
+                        {
+                            case LogColor.Blue:
+                                full.Append("<color=#0000FF>");
+                                break;
+                            case LogColor.Red:
+                                full.Append("<color=#FF0000>");
+                                break;
+                            case LogColor.Yellow:
+                                full.Append("<color=#FFFF00>");
+                                break;
+                            case LogColor.Magenta:
+                                full.Append("<color=#FF00FF>");
+                                break;
+                            case LogColor.Cyan:
+                                full.Append("<color=#00FFFF>");
+                                break;
+                            case LogColor.Green:
+                                full.Append("<color=#00FF00>");
+                                break;
+                            case LogColor.White:
+                                full.Append("<color=#FFFFFF>");
+                                break;
+                            default:
+                                break;
+                        }
+                        full.Append(builder);
+                        full.Append("</color>");
+                        UnityEngine.Debug.Log(full.ToString());
+                        full.Dispose();
+                    }
+
 #endif
                 }
                 else if (type == LogType.Warning)

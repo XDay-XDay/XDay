@@ -63,6 +63,11 @@ namespace XDay
 
         public int GetID(string s)
         {
+            if (string.IsNullOrEmpty(s))
+            {
+                return 0;
+            }
+
             bool found = m_StringToID.TryGetValue(s, out var id);
             if (found)
             {
@@ -76,6 +81,11 @@ namespace XDay
 
         public string GetString(int id)
         {
+            if (id == 0)
+            {
+                return "";
+            }
+
             m_IDToString.TryGetValue(id, out var str);
             return str;
         }

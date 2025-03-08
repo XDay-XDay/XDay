@@ -27,24 +27,24 @@ namespace XDay
 {
     public abstract class State
     {
-        public virtual void OnEnter()
+        public virtual void OnDestroy()
         {
+        }
 
+        public virtual void OnEnter(object args)
+        {
         }
 
         public virtual void OnExit()
         {
-
         }
 
         public virtual void OnPause()
         {
-
         }
 
         public virtual void OnResume()
         {
-
         }
 
         public virtual void Update(float dt)

@@ -34,27 +34,30 @@ using UnityEngine;
 
 namespace XDay
 {
-#if !PLATFORM_UNITY
-
-#endif
+    public enum LogColor
+    {
+        None, Red, Green, Blue, Cyan, Yellow, Magenta, White,
+    }
 
     public class LogSystem
     {
-        public LogSystem(bool enableConsoleLog, Action onInit, Action onDestroy, string logDir)
+        public LogSystem(LogSetting setting)
         {
-            onInit?.Invoke();
+            m_LogSetting = setting;
 
-            m_OnDestroy = onDestroy;
+            setting.ActionOnInit?.Invoke();
 
             AddReceiver(new FileLogReceiver(), new Dictionary<string, object>()
             {
                 {"OneFileMaxSize", 2*1024*1024L },
-                {"Path", logDir },
+                {"Path", setting.LogFileDirectory },
+                {"Name", setting.LogName },
+                {"CleanOldLogs", setting.ClearOldLogs},
             });
 
-            if (enableConsoleLog)
+            if (setting.EnableConsoleLog)
             {
-                if (onInit != null) 
+                if (setting.ActionOnInit != null) 
                 {
                     AddReceiver(new UnityConsoleLogReceiver());
                 }
@@ -67,7 +70,7 @@ namespace XDay
 
         public void OnDestroy()
         {
-            m_OnDestroy?.Invoke();
+            m_LogSetting.ActionOnDestroy?.Invoke();
 
             foreach (var receiver in m_Receivers)
             {
@@ -76,12 +79,13 @@ namespace XDay
         }
 
         public void Info(ZStringInterpolatedStringHandler message,
+            LogColor color = LogColor.None,
             [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = 0)
         {
             var builder = SetMessage(message.Builder, LogType.Log, callerMemberName, callerFilePath, callerLineNumber);
-            Notify(builder, LogType.Log, false);
+            Notify(builder, LogType.Log, color, false);
         }
 
         public void Warning(ZStringInterpolatedStringHandler message,
@@ -90,7 +94,7 @@ namespace XDay
             [CallerLineNumber] int callerLineNumber = 0)
         {
             var builder = SetMessage(message.Builder, LogType.Warning, callerMemberName, callerFilePath, callerLineNumber);
-            Notify(builder, LogType.Warning, false);
+            Notify(builder, LogType.Warning, LogColor.Yellow, false);
         }
 
         public void Error(ZStringInterpolatedStringHandler message,
@@ -99,7 +103,7 @@ namespace XDay
                     [CallerLineNumber] int callerLineNumber = 0)
         {
             var builder = SetMessage(message.Builder, LogType.Error, callerMemberName, callerFilePath, callerLineNumber);
-            Notify(builder, LogType.Error, false);
+            Notify(builder, LogType.Error, LogColor.Red, false);
         }
 
         public void Exception(Exception e,
@@ -110,7 +114,7 @@ namespace XDay
             var temp = ZString.CreateStringBuilder();
             temp.Append(e.Message);
             var builder = SetMessage(temp, LogType.Exception, callerMemberName, callerFilePath, callerLineNumber, e.StackTrace);
-            Notify(builder, LogType.Exception, false);
+            Notify(builder, LogType.Exception, LogColor.Red, false);
         }
 
         public void Assert(bool condition,
@@ -135,14 +139,14 @@ namespace XDay
             var builder = ZString.CreateStringBuilder();
             builder.Append(message);
             builder = SetMessage(builder, type, "", "", 0, stackTrace);
-            Notify(builder, type, true);
+            Notify(builder, type, LogColor.None, true);
         }
 
-        private void Notify(Utf16ValueStringBuilder message, LogType type, bool fromUnityDebug)
+        private void Notify(Utf16ValueStringBuilder message, LogType type, LogColor color, bool fromUnityDebug)
         {
             if (m_Receivers.Count == 1)
             {
-                m_Receivers[0].OnLogReceived(message, type, fromUnityDebug);
+                m_Receivers[0].OnLogReceived(message, type, color, fromUnityDebug);
             }
             else
             {
@@ -151,7 +155,7 @@ namespace XDay
                     //create message copy for every receiver
                     Utf16ValueStringBuilder temp = ZString.CreateStringBuilder();
                     temp.Append(message);
-                    receiver.OnLogReceived(temp, type, fromUnityDebug);
+                    receiver.OnLogReceived(temp, type, color, fromUnityDebug);
                 }
                 message.Dispose();
             }
@@ -174,9 +178,19 @@ namespace XDay
             var builder = ZString.CreateStringBuilder();
             builder.Append(LogHelper.LOG_IGNORE_KEY);
 
-            builder.Append("[Thread ");
-            builder.Append(Thread.CurrentThread.ManagedThreadId);
-            builder.Append("]");
+            if (m_LogSetting.ShowThreadID)
+            {
+                builder.Append("[Thread ");
+                builder.Append(Thread.CurrentThread.ManagedThreadId);
+                builder.Append("]");
+            }
+
+            if (m_LogSetting.ShowTime)
+            {
+                builder.Append("[");
+                builder.Append(DateTime.Now);
+                builder.Append("]");
+            }
 
             builder.Append("[");
             if (type == LogType.Log)
@@ -196,20 +210,23 @@ namespace XDay
                 builder.Append("Exception");
             }
             builder.Append("]");
-            if (!string.IsNullOrEmpty(callerFileName))
+            if (m_LogSetting.ShowFileName)
             {
-                builder.Append(callerFileName);
-            }
-            if (callerLineNumber > 0)
-            {
-                builder.Append("@Line.");
-                builder.Append(callerLineNumber);
-            }
-            if (!string.IsNullOrEmpty(callerMemberName))
-            {
-                builder.Append(" {");
-                builder.Append(callerMemberName);
-                builder.Append("} ");
+                if (!string.IsNullOrEmpty(callerFileName))
+                {
+                    builder.Append(callerFileName);
+                }
+                if (callerLineNumber > 0)
+                {
+                    builder.Append("@Line.");
+                    builder.Append(callerLineNumber);
+                }
+                if (!string.IsNullOrEmpty(callerMemberName))
+                {
+                    builder.Append(" {");
+                    builder.Append(callerMemberName);
+                    builder.Append("} ");
+                }
             }
             builder.Append(message);
             if (stackTrace != null)
@@ -225,13 +242,13 @@ namespace XDay
         }
 
         private readonly List<LogReceiver> m_Receivers = new List<LogReceiver>();
-        private Action m_OnDestroy;
+        private readonly LogSetting m_LogSetting;
     }
 
     internal abstract class LogReceiver
     {
         public virtual void Init(Dictionary<string, object> setting) { }
         public virtual void OnDestroy() { }
-        public abstract void OnLogReceived(Utf16ValueStringBuilder builder, LogType type, bool fromUnityDebug);
+        public abstract void OnLogReceived(Utf16ValueStringBuilder builder, LogType type, LogColor color, bool fromUnityDebug);
     }
 }

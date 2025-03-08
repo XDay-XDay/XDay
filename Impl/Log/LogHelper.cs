@@ -53,6 +53,15 @@ namespace XDay
             return defaultValue;
         }
 
+        public static bool GetBoolean(this Dictionary<string, object> dict, string key, bool defaultValue = false)
+        {
+            if (dict.TryGetValue(key, out var value))
+            {
+                return Convert.ToBoolean(value);
+            }
+            return defaultValue;
+        }
+
         public const string LOG_IGNORE_KEY = "##";
         public const int MAX_STACK_TRACE_SIZE = 2048;
     }

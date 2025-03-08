@@ -52,7 +52,22 @@ namespace XDay
             }
             m_OneFileMaxSize = setting.GetInt64("OneFileMaxSize", 2 * MB);
             m_Capacity = setting.GetInt64("Capacity", 100 * MB);
-            m_FileName = $"{DateTime.Now:yyyy-MM-dd HH-mm-ss}";
+            m_FileName = $"{DateTime.Now:yyyy-MM-dd HH-mm-ss}-{setting.GetString("Name", "Log")}";
+            m_CleanOldLogs = setting.GetBoolean("CleanOldLogs", false);
+
+            if (m_CleanOldLogs)
+            {
+                foreach (string file in Directory.GetFiles(m_FileFolder))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+            }
 
             m_Writer = new FileWriter(QueryFilePath(m_FileIndex));
 
@@ -73,7 +88,7 @@ namespace XDay
                 m_CurrentCapacity += fileInfo.Length;
             }
 
-            Console.WriteLine($"Info File Path: {m_FileFolder}");
+            Console.WriteLine($"Log File Path: {m_FileFolder}");
         }
 
         public override void OnDestroy()
@@ -85,7 +100,7 @@ namespace XDay
             m_Exit = true;
         }
 
-        public override void OnLogReceived(Utf16ValueStringBuilder builder, LogType type, bool fromUnityDebug)
+        public override void OnLogReceived(Utf16ValueStringBuilder builder, LogType type, LogColor color, bool fromUnityDebug)
         {
             if (builder.Length > m_MaxLength)
             {
@@ -197,6 +212,7 @@ namespace XDay
         private readonly object m_Lock = new object();
         private string m_UserName;
         private const int MB = 1024 * 1024;
+        private bool m_CleanOldLogs;
     }
 }
 

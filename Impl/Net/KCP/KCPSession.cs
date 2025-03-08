@@ -1,4 +1,27 @@
-﻿using System;
+/*
+ * Copyright (c) 2024-2025 XDay
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+using System;
 using System.Buffers;
 using System.Diagnostics;
 using System.Net;
@@ -72,7 +95,7 @@ namespace XDay
                     Debug.Assert(len <= m_Buffer.Length, "Overflow!");
                     if (m_Kcp.Recv(m_Buffer) >= 0)
                     {
-                        Log.Instance?.Info($"Received: {len} bytes");
+                        //Log.Instance?.Info($"Received: {len} bytes");
 
                         m_MessageTranscoder.Input(m_Buffer, Math.Min(m_Buffer.Length, len));
                         while (true)
@@ -80,16 +103,7 @@ namespace XDay
                             object msg = m_MessageTranscoder.Decode();
                             if (msg != null)
                             {
-                                if (m_ReceiveQueue != null)
-                                {
-                                    m_ReceiveQueue.Enqueue(msg);
-                                }
-                                else
-                                {
-                                    HandleMessage(msg);
-                                }
-
-                                OnMessageReceived();
+                                ProcessMessage(msg);
                             }
                             else
                             {
@@ -106,9 +120,22 @@ namespace XDay
         //如果使用queueMessage,则需要手动调用
         public void UpdateMessage()
         {
-            while (m_ReceiveQueue.TryDequeue(out var msg))
+            while (m_ReceiveQueue != null && m_ReceiveQueue.TryDequeue(out var msg))
             {
                 HandleMessage(msg);
+            }
+        }
+
+        public byte[] Encode(object msg)
+        {
+            return m_MessageTranscoder.Encode(msg);
+        }
+
+        public void Send(byte[] bytes)
+        {
+            if (IsConnected)
+            {
+                m_Kcp.Send(bytes);
             }
         }
 
@@ -141,6 +168,20 @@ namespace XDay
         public void RegisterMessageHandler(Type type, Action<object> handler)
         {
             m_MessageHandler.AddHandler(type, handler);
+        }
+
+        public void ProcessMessage(object msg)
+        {
+            if (m_ReceiveQueue != null)
+            {
+                m_ReceiveQueue.Enqueue(msg);
+            }
+            else
+            {
+                HandleMessage(msg);
+            }
+
+            OnMessageReceived();
         }
 
         private void HandleMessage(object msg)

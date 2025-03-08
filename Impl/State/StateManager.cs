@@ -30,6 +30,38 @@ namespace XDay
 {
     internal class StateManager : IStateManager
     {
+        public State CurrentState
+        {
+            get
+            {
+                if (m_ActivateStateStack.Count > 0)
+                {
+                    return m_ActivateStateStack[^1];
+                }
+                return null;
+            }
+        }
+
+        public void OnDestroy()
+        {
+            foreach (var state in m_States)
+            {
+                state.OnDestroy();
+            }
+        }
+
+        public T CreateState<T>(object args) where T : State
+        {
+            if (GetState<T>() == null)
+            {
+                var state = Activator.CreateInstance(typeof(T), args) as T;
+                m_States.Add(state);
+                return state;
+            }
+            Log.Instance?.Error($"{typeof(T).Name} is already created");
+            return null;
+        }
+
         public T CreateState<T>() where T : State, new()
         {
             if (GetState<T>() == null)
@@ -42,7 +74,7 @@ namespace XDay
             return null;
         }
 
-        public void PushState<T>() where T : State, new()
+        public void PushState<T>(object args) where T : State
         {
             var state = GetState<T>();
             foreach (var activeState in m_ActivateStateStack)
@@ -59,7 +91,7 @@ namespace XDay
                 m_ActivateStateStack[^1].OnPause();
             }
             m_ActivateStateStack.Add(state);
-            state.OnEnter();
+            state.OnEnter(args);
         }
 
         public void PopState(int n)
@@ -76,12 +108,18 @@ namespace XDay
             }
         }
 
-        public void ChangeState<T>() where T : State, new()
+        public T ChangeState<T>(object args) where T : State
         {
+            if (CurrentState != null && CurrentState.GetType() == typeof(T))
+            {
+                return CurrentState as T;
+            }
+
             PopState(m_ActivateStateStack.Count);
             var state = GetState<T>();
             m_ActivateStateStack.Add(state);
-            state.OnEnter();
+            state.OnEnter(args);
+            return state;
         }
 
         public void Update(float dt)
@@ -92,7 +130,7 @@ namespace XDay
             }
         }
 
-        private T GetState<T>() where T : State, new()
+        private T GetState<T>() where T : State
         {
             foreach (var state in m_States)
             {

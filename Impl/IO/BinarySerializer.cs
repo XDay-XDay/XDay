@@ -195,8 +195,9 @@ namespace XDay
 
         public void WriteList<T>(List<T> list, string label, System.Action<T, int> writeListElement)
         {
-            m_Writer.Write(list.Count);
-            for (int i = 0; i < list.Count; ++i)
+            int n = list == null ? 0 : list.Count;
+            m_Writer.Write(n);
+            for (int i = 0; i < n; ++i)
             {
                 writeListElement(list[i], i);
             }
@@ -204,6 +205,7 @@ namespace XDay
 
         public void WriteArray<T>(T[] array, string label, System.Action<T, int> writeArrayElement)
         {
+            int n = array == null ? 0 : array.Length;
             m_Writer.Write(array.Length);
             for (int i = 0; i < array.Length; ++i)
             {

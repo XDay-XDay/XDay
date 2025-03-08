@@ -38,12 +38,39 @@ namespace XDay
 
     internal class ConsoleLogReceiver : LogReceiver
     {
-        public override void OnLogReceived(Utf16ValueStringBuilder builder, LogType type, bool fromUnityDebug)
+        public override void OnLogReceived(Utf16ValueStringBuilder builder, LogType type, LogColor color, bool fromUnityDebug)
         {
             var oldColor = Console.ForegroundColor;
             if (type == LogType.Log)
             {
-                Console.ForegroundColor = ConsoleColor.Gray;
+                switch (color)
+                {
+                    case LogColor.Blue:
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        break;
+                    case LogColor.Red:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        break;
+                    case LogColor.Yellow:
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        break;
+                    case LogColor.Magenta:
+                        Console.ForegroundColor = ConsoleColor.Magenta;
+                        break;
+                    case LogColor.Cyan:
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        break;
+                    case LogColor.Green:
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        break;
+                    case LogColor.White:
+                        Console.ForegroundColor = ConsoleColor.White;
+                        break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                        break;
+                }
+                
                 Console.WriteLine(builder.ToString());
             }
             else if (type == LogType.Warning)

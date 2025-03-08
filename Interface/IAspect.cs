@@ -36,6 +36,8 @@ namespace XDay
     /// </summary>
     public interface IAspect
     {
+        public UnionType Type { get; }
+
         static IAspect FromArray<T>(T[] val, bool makeCopy)
         {
             return Aspect.FromArray(val, makeCopy);
@@ -159,8 +161,17 @@ namespace XDay
             return new NamedAspect(aspect, name);
         }
 
+        static INamedAspect Create()
+        {
+            return new NamedAspect();
+        }
+
         string Name { get; set; }
         IAspect Value { get; }
+
+        INamedAspect Clone();
+        void Serialize(ISerializer serializer);
+        void Deserialize(IDeserializer deserializer);
     }
 
     /// <summary>
