@@ -108,6 +108,11 @@ namespace XDay
 
         public void Update()
         {
+            if (m_Tasks.Count == 0)
+            {
+                return;
+            }
+
             var now = m_ActionGetCurrentTime();
             foreach (var kv in m_Tasks)
             {
