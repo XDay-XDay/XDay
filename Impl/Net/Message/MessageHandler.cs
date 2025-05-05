@@ -22,7 +22,7 @@
  */
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace XDay
 {
@@ -30,7 +30,7 @@ namespace XDay
     {
         public void AddHandler(Type type, Action<object> handler)
         {
-            m_MessageHandlers.Add(type, handler);
+            m_MessageHandlers.TryAdd(type, handler);
         }
 
         public void HandleMessage(object msg)
@@ -39,6 +39,6 @@ namespace XDay
             handler?.Invoke(msg);
         }
 
-        private readonly Dictionary<Type, Action<object>> m_MessageHandlers = new Dictionary<Type, Action<object>>();
+        private readonly ConcurrentDictionary<Type, Action<object>> m_MessageHandlers = new ();
     }
 }

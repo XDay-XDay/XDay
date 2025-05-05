@@ -189,6 +189,12 @@ namespace XDay
             return new AspectContainer(keyValues);
         }
 
+        int AspectCount { get; }
+
+        IAspectContainer Clone();
+
+        INamedAspect GetAspect(int index);
+
         /// <summary>
         /// find aspect by name
         /// </summary>
@@ -207,6 +213,8 @@ namespace XDay
         /// </summary>
         /// <param name="name"></param>
         void RemoveAspect(string name);
+
+        void RenameAspect(string oldName, string newName);
 
         /// <summary>
         /// get string aspect
@@ -228,5 +236,8 @@ namespace XDay
         Vector3 GetVector3(string name, Vector3 missingValue);
         Vector4 GetVector4(string name, Vector4 missingValue);
 #endif
+
+        void Serialize(ISerializer serializer);
+        void Deserialize(IDeserializer deserializer);
     }
 }

@@ -57,11 +57,16 @@ namespace XDay
             {
                 m_ReceiveQueue = new();
             }
+            m_DelayQueue = new();
 
             m_Kcp = new SimpleSegManager.Kcp(id, this);
             m_Kcp.NoDelay(1, 10, 2, 1);
             m_Kcp.WndSize(64, 64);
             m_Kcp.SetMtu(512);
+
+            m_Timer = ITickTimer.Create(false, 10, () => {
+                return (long)(DateTime.UtcNow - DateTime.UnixEpoch).TotalMilliseconds;
+            });
 
             m_TokenSource = new CancellationTokenSource();
             Task.Run(Update, m_TokenSource.Token);
@@ -77,6 +82,11 @@ namespace XDay
             m_Kcp?.Dispose();
             m_Kcp = null;
             m_Connected = false;
+        }
+
+        public void SetDelay(int delay)
+        {
+            m_CustomDelay = delay;
         }
 
         public async void Update()
@@ -172,6 +182,34 @@ namespace XDay
 
         public void ProcessMessage(object msg)
         {
+            if (m_CustomDelay > 0)
+            {
+                m_DelayQueue.Enqueue(msg);
+                DelayProcess();
+            }
+            else
+            {
+                ProcessMessageInternal(msg);
+            }
+        }
+
+        private void DelayProcess()
+        {
+            var timerID = m_Timer.AddTask(m_CustomDelay, () =>
+            {
+                bool ok = m_DelayQueue.TryDequeue(out var delayedMsg);
+                if (!ok)
+                {
+                    return;
+                }
+                Debug.Assert(ok);
+                ProcessMessageInternal(delayedMsg);
+                DelayProcess();
+            }, 1);
+        }
+
+        private void ProcessMessageInternal(object msg)
+        {
             if (m_ReceiveQueue != null)
             {
                 m_ReceiveQueue.Enqueue(msg);
@@ -204,5 +242,8 @@ namespace XDay
         private IMessageTranscoder m_MessageTranscoder;
         private MessageHandler m_MessageHandler = new();
         private ConcurrentQueue<object> m_ReceiveQueue;
+        private ConcurrentQueue<object> m_DelayQueue;
+        private int m_CustomDelay = 0;
+        private ITickTimer m_Timer;
     }
 }

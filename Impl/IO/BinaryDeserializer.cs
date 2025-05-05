@@ -88,6 +88,17 @@ namespace XDay
             return ret;
         }
 
+        public uint[] ReadUInt32Array(string label = null)
+        {
+            int n = m_Reader.ReadInt32();
+            uint[] ret = new uint[n];
+            for (int i = 0; i < n; ++i)
+            {
+                ret[i] = m_Reader.ReadUInt32();
+            }
+            return ret;
+        }
+
         public byte[] ReadByteArray(string label = null)
         {
             int n = m_Reader.ReadInt32();
@@ -374,10 +385,32 @@ namespace XDay
             return ret;
         }
 
-        private BinaryReader m_Reader;
-        private StringTable m_StringTable;
-        private ISerializableFactory m_SerializableCreator;
-        private bool m_IsReadingStringTable;
+        public List<Vector2> ReadVector2List(string label)
+        {
+            int n = m_Reader.ReadInt32();
+            List<Vector2> ret = new(n);
+            for (int i = 0; i < n; ++i)
+            {
+                ret.Add(ReadVector2());
+            }
+            return ret;
+        }
+
+        public List<Vector3> ReadVector3List(string label)
+        {
+            int n = m_Reader.ReadInt32();
+            List<Vector3> ret = new(n);
+            for (int i = 0; i < n; ++i)
+            {
+                ret.Add(ReadVector3());
+            }
+            return ret;
+        }
+
+        private readonly BinaryReader m_Reader;
+        private readonly StringTable m_StringTable;
+        private readonly ISerializableFactory m_SerializableCreator;
+        private readonly bool m_IsReadingStringTable;
     }
 }
 

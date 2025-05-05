@@ -31,6 +31,8 @@ namespace XDay
 {
     internal class AspectContainer : IAspectContainer
     {
+        public int AspectCount => m_Aspects.Count;
+
         public AspectContainer(Dictionary<string, object> keyValues = null)
         {
             if (keyValues != null)
@@ -117,6 +119,26 @@ namespace XDay
                     break;
                 }
             }
+        }
+
+        public void RenameAspect(string oldName, string newName)
+        {
+            var aspect = QueryAspect(oldName);
+            if (aspect == null)
+            {
+                Debug.Assert(false, $"Rename aspect {oldName}->{newName} failed!");
+                return;
+            }
+            aspect.Name = newName;
+        }
+
+        public INamedAspect GetAspect(int index)
+        {
+            if (index >= 0 && index < m_Aspects.Count) 
+            { 
+                return m_Aspects[index];
+            }
+            return null;
         }
 
         public INamedAspect QueryAspect(string name)
@@ -253,7 +275,7 @@ namespace XDay
             return aspect.Value.GetUInt64();
         }
 
-        public AspectContainer Clone()
+        public IAspectContainer Clone()
         {
             var cloned = new AspectContainer();
             foreach (var aspect in m_Aspects)
@@ -261,18 +283,6 @@ namespace XDay
                 cloned.AddAspect(aspect.Clone());
             }
             return cloned;
-        }
-
-        public void RenameAspect(string oldName, string newName)
-        {
-            foreach (var aspect in m_Aspects)
-            {
-                if (aspect.Name == oldName)
-                {
-                    aspect.Name = newName;
-                    break;
-                }
-            }
         }
 
         public void Serialize(ISerializer serializer)

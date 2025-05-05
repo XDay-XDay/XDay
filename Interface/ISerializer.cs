@@ -64,12 +64,15 @@ namespace XDay
         void WriteInt64(long value, string label);
         void WriteUInt64(ulong value, string label);
         void WriteInt32Array(int[] value, string label);
+        void WriteUInt32Array(uint[] value, string label);
         void WriteByteArray(byte[] value, string label);
         void WriteSingleArray(float[] value, string label);
         void WriteStringArray(string[] value, string label);
         void WriteInt32List(List<int> value, string label);
         void WriteStringList(List<string> value, string label);
         void WriteSingleList(List<float> value, string label);
+        void WriteVector2List(List<Vector2> value, string label);
+        void WriteVector3List(List<Vector3> value, string label);
         void WriteSingle(float value, string label);
         void WriteBoolean(bool value, string label);
         void WriteString(string value, string label);
@@ -131,12 +134,15 @@ namespace XDay
 
         T ReadEnum<T>(string label, T missingValue = default) where T : System.Enum;
         int[] ReadInt32Array(string label);
+        uint[] ReadUInt32Array(string label);
         byte[] ReadByteArray(string label);
         float[] ReadSingleArray(string label);
         string[] ReadStringArray(string label);
         List<int> ReadInt32List(string label);
         List<string> ReadStringList(string label);
         List<float> ReadSingleList(string label);
+        List<Vector2> ReadVector2List(string label);
+        List<Vector3> ReadVector3List(string label);
         List<T> ReadList<T>(string label, System.Func<int, T> readListElement);
         T[] ReadArray<T>(string label, System.Func<int, T> readArrayElement);
         void ReadStructure(string label, System.Action readFunc);

@@ -120,6 +120,16 @@ namespace XDay
             }
         }
 
+        public void WriteUInt32Array(uint[] value, string label = null)
+        {
+            int n = value != null ? value.Length : 0;
+            m_Writer.Write(n);
+            for (int i = 0; i < n; ++i)
+            {
+                m_Writer.Write(value[i]);
+            }
+        }
+
         public void WriteByteArray(byte[] value, string label = null)
         {
             int n = value != null ? value.Length : 0;
@@ -399,6 +409,26 @@ namespace XDay
             Seek(seekToOffset, SeekOrigin.Begin);
             WriteInt64(writeValue);
             Position = curPos;
+        }
+
+        public void WriteVector2List(List<Vector2> value, string label)
+        {
+            int n = value != null ? value.Count : 0;
+            m_Writer.Write(n);
+            for (int i = 0; i < n; ++i)
+            {
+                WriteVector2(value[i]);
+            }
+        }
+
+        public void WriteVector3List(List<Vector3> value, string label)
+        {
+            int n = value != null ? value.Count : 0;
+            m_Writer.Write(n);
+            for (int i = 0; i < n; ++i)
+            {
+                WriteVector3(value[i]);
+            }
         }
 
         private BinaryWriter m_Writer;
