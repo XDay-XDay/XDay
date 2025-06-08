@@ -141,11 +141,6 @@ namespace XDay
             m_Serializer.WriteSingleList(value, label);
         }
 
-        public void WriteVector3List(List<Vector3> value, string label)
-        {
-            m_Serializer.WriteVector3List(value, label);
-        }
-
         public void WriteString(string value, string label)
         {
             m_Serializer.WriteString(value, label);
@@ -227,11 +222,61 @@ namespace XDay
             m_Serializer.WriteVector4Array(value, label);
         }
 
+        public void WriteVector2Int(Vector2Int value, string label)
+        {
+            m_Serializer.WriteVector2Int(value, label);
+        }
+
+        public void WriteVector3Int(Vector3Int value, string label)
+        {
+            m_Serializer.WriteVector3Int(value, label);
+        }
+
         public void WriteVector2List(List<Vector2> value, string label)
         {
             m_Serializer.WriteVector2List(value, label);
         }
+
+        public void WriteVector3List(List<Vector3> value, string label)
+        {
+            m_Serializer.WriteVector3List(value, label);
+        }
+
+        public void WriteVector4List(List<Vector4> value, string label)
+        {
+            m_Serializer.WriteVector4List(value, label);
+        }
+
+        public void WriteVector2IntArray(Vector2Int[] value, string label)
+        {
+            m_Serializer.WriteVector2IntArray(value, label);
+        }
+
+        public void WriteVector3IntArray(Vector3Int[] value, string label)
+        {
+            m_Serializer.WriteVector3IntArray(value, label);
+        }
+
+        public void WriteVector2IntList(List<Vector2Int> value, string label)
+        {
+            m_Serializer.WriteVector2IntList(value, label);
+        }
+
+        public void WriteVector3IntList(List<Vector3Int> value, string label)
+        {
+            m_Serializer.WriteVector3IntList(value, label);
+        }
 #endif
+
+        public void WriteBooleanArray(bool[] value, string label)
+        {
+            m_Serializer.WriteBooleanArray(value, label);
+        }
+
+        public void WriteUInt16Array(ushort[] value, string label)
+        {
+            m_Serializer.WriteUInt16Array(value, label);
+        }
 
         private ISerializer m_Serializer;
         private string m_FilePath;

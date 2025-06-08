@@ -110,6 +110,16 @@ namespace XDay
             m_Writer.Write(value);
         }
 
+        public void WriteBooleanArray(bool[] value, string label)
+        {
+            int n = value != null ? value.Length : 0;
+            m_Writer.Write(n);
+            for (int i = 0; i < n; ++i)
+            {
+                m_Writer.Write(value[i]);
+            }
+        }
+
         public void WriteInt32Array(int[] value, string label = null)
         {
             int n = value != null ? value.Length : 0;
@@ -121,6 +131,16 @@ namespace XDay
         }
 
         public void WriteUInt32Array(uint[] value, string label = null)
+        {
+            int n = value != null ? value.Length : 0;
+            m_Writer.Write(n);
+            for (int i = 0; i < n; ++i)
+            {
+                m_Writer.Write(value[i]);
+            }
+        }
+
+        public void WriteUInt16Array(ushort[] value, string label = null)
         {
             int n = value != null ? value.Length : 0;
             m_Writer.Write(n);
@@ -303,28 +323,134 @@ namespace XDay
 
         public void WriteVector2Array(Vector2[] value, string label)
         {
-            WriteInt32(value.Length);
-            foreach (var v in value)
+            WriteInt32(value == null ? 0 : value.Length);
+            if (value != null)
             {
-                WriteVector2(v);
+                foreach (var v in value)
+                {
+                    WriteVector2(v);
+                }
             }
         }
 
         public void WriteVector3Array(Vector3[] value, string label)
         {
-            WriteInt32(value.Length);
-            foreach (var v in value)
+            WriteInt32(value == null ? 0 : value.Length);
+            if (value != null)
             {
-                WriteVector3(v);
+                foreach (var v in value)
+                {
+                    WriteVector3(v);
+                }
             }
         }
 
         public void WriteVector4Array(Vector4[] value, string label)
         {
-            WriteInt32(value.Length);
-            foreach (var v in value)
+            WriteInt32(value == null ? 0 : value.Length);
+            if (value != null)
             {
-                WriteVector4(v);
+                foreach (var v in value)
+                {
+                    WriteVector4(v);
+                }
+            }
+        }
+
+        public void WriteVector2IntList(List<Vector2Int> value, string label = null)
+        {
+            WriteInt32(value == null ? 0 : value.Count);
+            if (value != null)
+            {
+                for (var i = 0; i < value.Count; ++i)
+                {
+                    WriteVector2Int(value[i]);
+                }
+            }
+        }
+
+        public void WriteVector2Int(Vector2Int value, string label = null)
+        {
+            m_Writer.Write(value.x);
+            m_Writer.Write(value.y);
+        }
+
+        public void WriteVector3Int(Vector3Int value, string label = null)
+        {
+            m_Writer.Write(value.x);
+            m_Writer.Write(value.y);
+            m_Writer.Write(value.z);
+        }
+
+        public void WriteVector2List(List<Vector2> value, string label)
+        {
+            WriteInt32(value == null ? 0 : value.Count);
+            if (value != null)
+            {
+                foreach (var v in value)
+                {
+                    WriteVector2(v);
+                }
+            }
+        }
+
+        public void WriteVector3List(List<Vector3> value, string label)
+        {
+            WriteInt32(value == null ? 0 : value.Count);
+            if (value != null)
+            {
+                foreach (var v in value)
+                {
+                    WriteVector3(v);
+                }
+            }
+        }
+
+        public void WriteVector4List(List<Vector4> value, string label)
+        {
+            WriteInt32(value == null ? 0 : value.Count);
+            if (value != null)
+            {
+                foreach (var v in value)
+                {
+                    WriteVector4(v);
+                }
+            }
+        }
+
+        public void WriteVector2IntArray(Vector2Int[] value, string label)
+        {
+            WriteInt32(value == null ? 0 : value.Length);
+            if (value != null)
+            {
+                foreach (var v in value)
+                {
+                    WriteVector2Int(v);
+                }
+            }
+        }
+
+        public void WriteVector3IntArray(Vector3Int[] value, string label)
+        {
+            WriteInt32(value == null ? 0 : value.Length);
+            if (value != null)
+            {
+                foreach (var v in value)
+                {
+                    WriteVector3Int(v);
+                }
+            }
+        }
+
+        public void WriteVector3IntList(List<Vector3Int> value, string label)
+        {
+            WriteInt32(value == null ? 0 : value.Count);
+            if (value != null)
+            {
+                foreach (var v in value)
+                {
+                    WriteVector3Int(v);
+                }
             }
         }
 #endif
@@ -409,26 +535,6 @@ namespace XDay
             Seek(seekToOffset, SeekOrigin.Begin);
             WriteInt64(writeValue);
             Position = curPos;
-        }
-
-        public void WriteVector2List(List<Vector2> value, string label)
-        {
-            int n = value != null ? value.Count : 0;
-            m_Writer.Write(n);
-            for (int i = 0; i < n; ++i)
-            {
-                WriteVector2(value[i]);
-            }
-        }
-
-        public void WriteVector3List(List<Vector3> value, string label)
-        {
-            int n = value != null ? value.Count : 0;
-            m_Writer.Write(n);
-            for (int i = 0; i < n; ++i)
-            {
-                WriteVector3(value[i]);
-            }
         }
 
         private BinaryWriter m_Writer;

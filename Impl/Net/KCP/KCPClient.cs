@@ -25,7 +25,6 @@ using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -41,12 +40,13 @@ namespace XDay
         /// <param name="port"></param>
         /// <param name="decoderCreator"></param>
         /// <param name="queueMessage">if message is queued, you have to call update to handle received messages</param>
-        public void Start(string ip, int port, Func<IMessageTranscoder> decoderCreator, bool queueMessage)
+        public void Start(string ip, int port, Func<IMessageTranscoder> decoderCreator, bool queueMessage, Action onDisconnect)
         {
             Log.Instance?.Info($"Start KCPClient");
 
             m_DecoderCreator = decoderCreator;
             m_QueueMessage = queueMessage;
+            m_OnDisconnect = onDisconnect;
             m_Remote = new IPEndPoint(IPAddress.Parse(ip), port);
             m_Udp = new UdpClient();
             //bind
@@ -170,6 +170,7 @@ namespace XDay
 
         private void OnSessionClose(KCPSession session)
         {
+            m_OnDisconnect?.Invoke();
             Debug.Assert(session == m_Session);
             m_Session = null;
             m_TokenSource.Cancel();
@@ -177,21 +178,12 @@ namespace XDay
             m_Udp = null;
         }
 
-        private string ToString(byte[] bytes)
-        {
-            string str = "";
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                str += string.Format("\n      [{0}]:{1}", i, bytes[i]);
-            }
-            return str;
-        }
-
         private UdpClient m_Udp;
         private CancellationTokenSource m_TokenSource;
         private Session m_Session;
         private IPEndPoint m_Remote;
         private Func<IMessageTranscoder> m_DecoderCreator;
+        private Action m_OnDisconnect;
         private bool m_QueueMessage;
         private const int m_MaxCheckTime = 5000;
     }

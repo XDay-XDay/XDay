@@ -99,6 +99,17 @@ namespace XDay
             return ret;
         }
 
+        public ushort[] ReadUInt16Array(string label = null)
+        {
+            int n = m_Reader.ReadInt32();
+            ushort[] ret = new ushort[n];
+            for (int i = 0; i < n; ++i)
+            {
+                ret[i] = m_Reader.ReadUInt16();
+            }
+            return ret;
+        }
+
         public byte[] ReadByteArray(string label = null)
         {
             int n = m_Reader.ReadInt32();
@@ -304,6 +315,93 @@ namespace XDay
             var maxY = m_Reader.ReadFloat();
             return new Rect(minX, minY, maxX - minX, maxY - minY);
         }
+
+        public Vector2Int ReadVector2Int(string label = null, Vector2Int missingValue = default)
+        {
+            return new Vector2Int(m_Reader.ReadInt32(), m_Reader.ReadInt32());
+        }
+
+        public Vector3Int ReadVector3Int(string label = null, Vector3Int missingValue = default)
+        {
+            return new Vector3Int(m_Reader.ReadInt32(), m_Reader.ReadInt32(), m_Reader.ReadInt32());
+        }
+
+        public List<Vector2> ReadVector2List(string label)
+        {
+            var n = m_Reader.ReadInt32();
+            var ret = new List<Vector2>(n);
+            for (var i = 0; i < n; ++i)
+            {
+                ret.Add(ReadVector2());
+            }
+            return ret;
+        }
+
+        public List<Vector3> ReadVector3List(string label)
+        {
+            var n = m_Reader.ReadInt32();
+            var ret = new List<Vector3>(n);
+            for (var i = 0; i < n; ++i)
+            {
+                ret.Add(ReadVector3());
+            }
+            return ret;
+        }
+
+        public List<Vector4> ReadVector4List(string label)
+        {
+            var n = m_Reader.ReadInt32();
+            var ret = new List<Vector4>(n);
+            for (var i = 0; i < n; ++i)
+            {
+                ret.Add(ReadVector4());
+            }
+            return ret;
+        }
+
+        public Vector2Int[] ReadVector2IntArray(string label)
+        {
+            var n = m_Reader.ReadInt32();
+            var ret = new Vector2Int[n];
+            for (var i = 0; i < n; ++i)
+            {
+                ret[i] = ReadVector2Int();
+            }
+            return ret;
+        }
+
+        public Vector3Int[] ReadVector3IntArray(string label = null)
+        {
+            var n = m_Reader.ReadInt32();
+            var ret = new Vector3Int[n];
+            for (var i = 0; i < n; ++i)
+            {
+                ret[i] = ReadVector3Int();
+            }
+            return ret;
+        }
+
+        public List<Vector2Int> ReadVector2IntList(string label = null)
+        {
+            var n = m_Reader.ReadInt32();
+            var ret = new List<Vector2Int>(n);
+            for (var i = 0; i < n; ++i)
+            {
+                ret.Add(ReadVector2Int());
+            }
+            return ret;
+        }
+
+        public List<Vector3Int> ReadVector3IntList(string label = null)
+        {
+            var n = m_Reader.ReadInt32();
+            var ret = new List<Vector3Int>(n);
+            for (var i = 0; i < n; ++i)
+            {
+                ret.Add(ReadVector3Int());
+            }
+            return ret;
+        }
 #endif
 
         public T ReadEnum<T>(string label = null, T missingValue = default) where T : Enum
@@ -385,24 +483,13 @@ namespace XDay
             return ret;
         }
 
-        public List<Vector2> ReadVector2List(string label)
+        public bool[] ReadBooleanArray(string label)
         {
             int n = m_Reader.ReadInt32();
-            List<Vector2> ret = new(n);
+            bool[] ret = new bool[n];
             for (int i = 0; i < n; ++i)
             {
-                ret.Add(ReadVector2());
-            }
-            return ret;
-        }
-
-        public List<Vector3> ReadVector3List(string label)
-        {
-            int n = m_Reader.ReadInt32();
-            List<Vector3> ret = new(n);
-            for (int i = 0; i < n; ++i)
-            {
-                ret.Add(ReadVector3());
+                ret[i] = ReadBoolean();
             }
             return ret;
         }
