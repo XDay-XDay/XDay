@@ -34,11 +34,12 @@ namespace XDay
 {
     public class KCPServer<Session> where Session : KCPSession, new()
     {
-        public void Start(string ip, int port, Func<IMessageTranscoder> decoderCreator, bool queueMessage)
+        public void Start(string ip, int port, Func<IMessageTranscoder> decoderCreator, MessageHandler messageHandler, bool queueMessage)
         {
             Log.Instance?.Info($"Start KCPServer");
 
             m_QueueMessage = queueMessage;
+            m_MessageHandler = messageHandler;
 
             var remote = new IPEndPoint(IPAddress.Parse(ip), port);
             m_Udp = new UdpClient(remote);
@@ -112,7 +113,7 @@ namespace XDay
                         if (session == null)
                         {
                             session = new Session();
-                            session.Init(conv, SendUDPData, ret.RemoteEndPoint, OnSessionClose, m_DecoderCreator(), m_QueueMessage);
+                            session.Init(conv, SendUDPData, ret.RemoteEndPoint, OnSessionClose, m_DecoderCreator(), m_MessageHandler, m_QueueMessage);
                             m_Sessions.TryAdd(conv, session);
                             Log.Instance?.Info($"创建Session: {conv}, addr: {ret.RemoteEndPoint} to {m_Udp.Client.LocalEndPoint}", LogColor.Red);
                         }
@@ -155,10 +156,16 @@ namespace XDay
             return str;
         }
 
+        public void RegisterMessageHandler(Type messageType, Action<object> action)
+        {
+            m_MessageHandler.AddHandler(messageType, action);
+        }
+
         private UdpClient m_Udp;
         private CancellationTokenSource m_TokenSource;
         private readonly ConcurrentDictionary<uint, Session> m_Sessions = new();
         private Func<IMessageTranscoder> m_DecoderCreator;
+        private MessageHandler m_MessageHandler;
         private bool m_QueueMessage;
         private int m_SessionID;
     }

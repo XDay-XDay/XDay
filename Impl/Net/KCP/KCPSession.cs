@@ -45,6 +45,7 @@ namespace XDay
             IPEndPoint remote, 
             Action<KCPSession> onClose, 
             IMessageTranscoder transcoder,
+            MessageHandler messageHandler,
             bool queueMessage)
         {
             m_ID = id;
@@ -53,6 +54,7 @@ namespace XDay
             m_Connected = true;
             m_OnClose = onClose;
             m_MessageTranscoder = transcoder;
+            m_MessageHandler = messageHandler;
             if (queueMessage)
             {
                 m_ReceiveQueue = new();
@@ -69,6 +71,7 @@ namespace XDay
             });
 
             m_TokenSource = new CancellationTokenSource();
+            //线程池调用
             Task.Run(Update, m_TokenSource.Token);
 
             OnConnected();
@@ -106,7 +109,6 @@ namespace XDay
                     if (m_Kcp.Recv(m_Buffer) >= 0)
                     {
                         //Log.Instance?.Info($"Received: {len} bytes");
-
                         m_MessageTranscoder.Input(m_Buffer, Math.Min(m_Buffer.Length, len));
                         while (true)
                         {
@@ -170,16 +172,6 @@ namespace XDay
             }
         }
 
-        public void Output(IMemoryOwner<byte> buffer, int validLength)
-        {
-            m_Sender.Invoke(buffer.Memory.Slice(0, validLength).ToArray(), m_Remote);
-        }
-
-        public void RegisterMessageHandler(Type type, Action<object> handler)
-        {
-            m_MessageHandler.AddHandler(type, handler);
-        }
-
         public void ProcessMessage(object msg)
         {
             if (m_CustomDelay > 0)
@@ -227,6 +219,11 @@ namespace XDay
             m_MessageHandler.HandleMessage(msg);
         }
 
+        void IKcpCallback.Output(IMemoryOwner<byte> buffer, int validLength)
+        {
+            m_Sender.Invoke(buffer.Memory.Slice(0, validLength).ToArray(), m_Remote);
+        }
+
         protected abstract void OnConnected();
         protected abstract void OnClose();
         protected virtual void OnMessageReceived() { }
@@ -240,7 +237,7 @@ namespace XDay
         private bool m_Connected = false;
         private Action<KCPSession> m_OnClose;
         private IMessageTranscoder m_MessageTranscoder;
-        private MessageHandler m_MessageHandler = new();
+        private MessageHandler m_MessageHandler;
         private ConcurrentQueue<object> m_ReceiveQueue;
         private ConcurrentQueue<object> m_DelayQueue;
         private int m_CustomDelay = 0;

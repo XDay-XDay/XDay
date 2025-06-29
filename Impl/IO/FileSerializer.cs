@@ -207,6 +207,16 @@ namespace XDay
             m_Serializer.WriteRect(rect, label);
         }
 
+        public void WriteColorArray(Color[] value, string label)
+        {
+            m_Serializer.WriteColorArray(value, label);
+        }
+
+        public void WriteColor32Array(Color32[] value, string label)
+        {
+            m_Serializer.WriteColor32Array(value, label);
+        }
+
         public void WriteVector2Array(Vector2[] value, string label)
         {
             m_Serializer.WriteVector2Array(value, label);

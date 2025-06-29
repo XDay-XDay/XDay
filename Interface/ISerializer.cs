@@ -89,6 +89,8 @@ namespace XDay
         void WriteRect(Rect rect, string label);
         void WriteColor(Color color, string label);
         void WriteColor32(Color32 color, string label);
+        void WriteColorArray(Color[] value, string label);
+        void WriteColor32Array(Color32[] value, string label);
         void WriteVector2Array(Vector2[] value, string label);
         void WriteVector3Array(Vector3[] value, string label);
         void WriteVector4Array(Vector4[] value, string label);
@@ -138,6 +140,8 @@ namespace XDay
         Rect ReadRect(string label, Rect missingValue = default);
         Color ReadColor(string label, Color missingValue = default);
         Color32 ReadColor32(string label, Color32 missingValue = default);
+        Color[] ReadColorArray(string label);
+        Color32[] ReadColor32Array(string label);
         Vector2[] ReadVector2Array(string label);
         Vector3[] ReadVector3Array(string label);
         Vector4[] ReadVector4Array(string label);

@@ -274,6 +274,28 @@ namespace XDay
             return bounds;
         }
 
+        public Color[] ReadColorArray(string label)
+        {
+            var n = m_Reader.ReadInt32();
+            var ret = new Color[n];
+            for (var i = 0; i < n; ++i)
+            {
+                ret[i] = ReadColor();
+            }
+            return ret;
+        }
+
+        public Color32[] ReadColor32Array(string label)
+        {
+            var n = m_Reader.ReadInt32();
+            var ret = new Color32[n];
+            for (var i = 0; i < n; ++i)
+            {
+                ret[i] = ReadColor32();
+            }
+            return ret;
+        }
+
         public Vector2[] ReadVector2Array(string label)
         {
             var n = m_Reader.ReadInt32();

@@ -321,6 +321,30 @@ namespace XDay
             m_Writer.Write(bounds.max.z);
         }
 
+        public void WriteColorArray(Color[] value, string label)
+        {
+            WriteInt32(value == null ? 0 : value.Length);
+            if (value != null)
+            {
+                foreach (var v in value)
+                {
+                    WriteColor(v);
+                }
+            }
+        }
+
+        public void WriteColor32Array(Color32[] value, string label)
+        {
+            WriteInt32(value == null ? 0 : value.Length);
+            if (value != null)
+            {
+                foreach (var v in value)
+                {
+                    WriteColor32(v);
+                }
+            }
+        }
+
         public void WriteVector2Array(Vector2[] value, string label)
         {
             WriteInt32(value == null ? 0 : value.Length);

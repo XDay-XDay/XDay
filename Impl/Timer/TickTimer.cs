@@ -30,6 +30,12 @@ namespace XDay
 {
     internal class TickTimer : ITickTimer
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="queueMessage"></param>
+        /// <param name="internalThreadTickInterval">0表示不使用额外线程,需要手动调用Update更新</param>
+        /// <param name="actionGetCurrentTime"></param>
         public TickTimer(bool queueMessage, int internalThreadTickInterval, Func<long> actionGetCurrentTime)
         {
             if (queueMessage)

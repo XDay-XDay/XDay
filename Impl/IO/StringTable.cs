@@ -90,7 +90,7 @@ namespace XDay
             return str;
         }
 
-        private static int m_NextID = 0;
+        private int m_NextID = 0;
         private Dictionary<string, int> m_StringToID = new();
         private Dictionary<int, string> m_IDToString = new();
         private const int m_Version = 1;

@@ -34,6 +34,11 @@ namespace XDay
             return new TickTimer(queueMessage, internalThreadTickInterval, actionGetCurrentTime);
         }
 
+        static ITickTimer CreateSingleThread(Func<long> actionGetCurrentTime)
+        {
+            return new TickTimer(false, 0, actionGetCurrentTime);
+        }
+
         void OnDestroy();
         int AddTask(int intervalInMs, Action action, int count = 0, Action actionOnCancel = null);
         bool CancelTask(int timerID);

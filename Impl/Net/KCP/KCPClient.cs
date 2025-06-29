@@ -33,54 +33,46 @@ namespace XDay
     public class KCPClient<Session> where Session : KCPSession, new()
     {
         public IPEndPoint LocalAddress => m_Udp.Client.LocalEndPoint as IPEndPoint;
+        public event Action EventOnDisconnected;
+        public event Action EventOnConnected;
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
         /// <param name="decoderCreator"></param>
-        /// <param name="queueMessage">if message is queued, you have to call update to handle received messages</param>
-        public void Start(string ip, int port, Func<IMessageTranscoder> decoderCreator, bool queueMessage, Action onDisconnect)
+        public void Start(string ip, int port, Func<IMessageTranscoder> decoderCreator, MessageHandler messageHandler)
         {
-            Log.Instance?.Info($"Start KCPClient");
+            Log.Instance?.Info($"Start KCPClient", LogColor.Cyan);
 
             m_DecoderCreator = decoderCreator;
-            m_QueueMessage = queueMessage;
-            m_OnDisconnect = onDisconnect;
+            m_MessageHandler = messageHandler;
             m_Remote = new IPEndPoint(IPAddress.Parse(ip), port);
             m_Udp = new UdpClient();
-            //bind
             m_Udp.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
             Log.Instance?.Info($"Local Endpoint: {m_Udp.Client.LocalEndPoint}", LogColor.Yellow);
-            //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            //{
-            //    m_Udp.Client.IOControl((IOControlCode)(-1744830452), new byte[] { 0, 0, 0, 0 }, null);
-            //}
             m_TokenSource = new CancellationTokenSource();
             Task.Run(ReceiveLoop, m_TokenSource.Token);
         }
 
         public void Connect(int checkIntervalInMs)
         {
-            Log.Instance?.Info($"Try Connect");
+            Log.Instance?.Info($"Try Connect", LogColor.Magenta);
 
-            if (m_Udp != null)
-            {
-                m_Udp.Send(new byte[4], 4, m_Remote);
-            }
+            m_Udp?.Send(new byte[4], 4, m_Remote);
+
             Task.Run(async () => {
                 var totalConnectionCheckTime = 0;
                 while (m_Session == null)
                 {
                     await Task.Delay(checkIntervalInMs);
                     totalConnectionCheckTime += checkIntervalInMs;
-
                     if (totalConnectionCheckTime >= m_MaxCheckTime)
                     {
                         break;
                     }
                 }
-
                 if (m_Session == null)
                 {
                     Connect(checkIntervalInMs);
@@ -110,12 +102,19 @@ namespace XDay
             }
         }
 
+        /// <summary>
+        /// 处理接收到的消息
+        /// </summary>
         public void Update()
         {
             m_Session?.UpdateMessage();
         }
 
-        public void ProcessMessage(object msg)
+        /// <summary>
+        /// 模拟收到了一个消息,一般用于GMSystem
+        /// </summary>
+        /// <param name="msg"></param>
+        public void SimulateMessageReceived(object msg)
         {
             m_Session?.ProcessMessage(msg);
         }
@@ -142,7 +141,8 @@ namespace XDay
                                 conv = BitConverter.ToUInt32(ret.Buffer, 4);
                                 Debug.Assert(conv != 0);
                                 m_Session = new Session();
-                                m_Session.Init(conv, SendUDPData, ret.RemoteEndPoint, OnSessionClose, m_DecoderCreator(), m_QueueMessage);
+                                m_Session.Init(conv, SendUDPData, ret.RemoteEndPoint, OnSessionClose, m_DecoderCreator(), m_MessageHandler, queueMessage:true);
+                                EventOnConnected?.Invoke();
                             }
                             else
                             {
@@ -170,7 +170,7 @@ namespace XDay
 
         private void OnSessionClose(KCPSession session)
         {
-            m_OnDisconnect?.Invoke();
+            EventOnDisconnected?.Invoke();
             Debug.Assert(session == m_Session);
             m_Session = null;
             m_TokenSource.Cancel();
@@ -183,8 +183,7 @@ namespace XDay
         private Session m_Session;
         private IPEndPoint m_Remote;
         private Func<IMessageTranscoder> m_DecoderCreator;
-        private Action m_OnDisconnect;
-        private bool m_QueueMessage;
+        private MessageHandler m_MessageHandler;
         private const int m_MaxCheckTime = 5000;
     }
 }

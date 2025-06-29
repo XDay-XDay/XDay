@@ -52,7 +52,7 @@ namespace MiniJSON
     //                          "\"bool\": true, " +
     //                          "\"null\": null }";
     //
-    //          var dict = Json.EditorDeserialize(jsonString) as Dictionary<string,object>;
+    //          var dict = Json.Deserialize(jsonString) as Dictionary<string,object>;
     //
     //          Debug.Log("deserialized: " + dict.GetType());
     //          Debug.Log("dict['array'][0]: " + ((List<object>) dict["array"])[0]);
@@ -61,7 +61,7 @@ namespace MiniJSON
     //          Debug.Log("dict['int']: " + (long) dict["int"]); // ints come out as longs
     //          Debug.Log("dict['unicode']: " + (string) dict["unicode"]);
     //
-    //          var str = Json.EditorSerialize(dict);
+    //          var str = Json.Serialize(dict);
     //
     //          Debug.Log("serialized: " + str);
     //      }
