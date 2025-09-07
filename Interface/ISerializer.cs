@@ -26,6 +26,7 @@ using System.IO;
 #if PLATFORM_UNITY
 using UnityEngine;
 #endif
+using UnityEngine.Scripting;
 
 namespace XDay
 {
@@ -170,6 +171,7 @@ namespace XDay
         T ReadSerializable<T>(string label, bool gameData) where T : class, ISerializable;
     }
 
+    [Preserve]
     public interface ISerializable
     {
         string TypeName { get; }

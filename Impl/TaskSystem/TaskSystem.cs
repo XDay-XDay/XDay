@@ -24,9 +24,11 @@
 
 
 using System.Collections.Generic;
+using UnityEngine.Scripting;
 
 namespace XDay
 {
+    [Preserve]
     internal class TaskSystem : ITaskSystem
     {
         public TaskSystem(TaskSystemCreateInfo initInfo)
