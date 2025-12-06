@@ -21,13 +21,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
+using UnityEngine;
 
 namespace XDay
 {
     public class Ticker
 	{
-        public float NormalizedTime => m_Duration == 0 ? 1.0f : m_Timer / m_Duration;
+        public float NormalizedTime => m_Duration == 0 ? 1.0f : Mathf.Clamp01(m_Timer / m_Duration);
 
         public void Reset()
         {
