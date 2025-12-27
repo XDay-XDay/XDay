@@ -35,7 +35,7 @@ namespace XDay
         public State CurrentState { get; }
 
         void OnDestroy();
-        T CreateState<T>(object args) where T : State;
+        T CreateState<T>(params object[] args) where T : State;
         T CreateState<T>() where T : State, new();
         T ChangeState<T>(object args = null) where T : State;
         void PushState<T>(object args = null) where T : State;

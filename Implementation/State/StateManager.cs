@@ -50,7 +50,7 @@ namespace XDay
             }
         }
 
-        public T CreateState<T>(object args) where T : State
+        public T CreateState<T>(params object[] args) where T : State
         {
             if (GetState<T>() == null)
             {
