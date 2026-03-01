@@ -516,6 +516,18 @@ namespace XDay
             return ret;
         }
 
+        public Dictionary<K, V> ReadDictionary<K, V>(string label, Func<int, KeyValuePair<K, V>> readKeyValueFunc)
+        {
+            int count = m_Reader.ReadInt32();
+            Dictionary<K, V> values = new(count);
+            for (int i = 0; i < count; ++i)
+            {
+                var kv = readKeyValueFunc(i);
+                values.Add(kv.Key, kv.Value);
+            }
+            return values;
+        }
+
         private readonly BinaryReader m_Reader;
         private readonly StringTable m_StringTable;
         private readonly ISerializableFactory m_SerializableCreator;

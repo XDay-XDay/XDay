@@ -103,10 +103,10 @@ namespace XDay
         void WriteVector2IntList(List<Vector2Int> value, string label);
         void WriteVector3IntList(List<Vector3Int> value, string label);
 #endif
-
         void WriteEnum<T>(T value, string label) where T : System.Enum;
         void WriteList<T>(List<T> values, string label, System.Action<T, int> writeListElement);
         void WriteArray<T>(T[] values, string label, System.Action<T, int> writeArrayElement);
+        void WriteDictionary<K,V>(Dictionary<K,V> values, string label, System.Action<K, V, int> writeKeyValueFunc);
         void WriteStructure(string label, System.Action writeFunc);
         void WriteObjectID(int id, string label, IObjectIDConverter converter);
         void WriteSerializable(ISerializable serializable, string label, IObjectIDConverter converter, bool gameData);
@@ -129,7 +129,6 @@ namespace XDay
         bool[] ReadBooleanArray(string label);
         byte ReadByte(string label, byte missingValue = default);
         string ReadString(string label, string missingValue = default);
-
 #if PLATFORM_UNITY
         Vector2 ReadVector2(string label, Vector2 missingValue = default);
         Vector3 ReadVector3(string label, Vector3 missingValue = default);
@@ -154,7 +153,6 @@ namespace XDay
         List<Vector2Int> ReadVector2IntList(string label);
         List<Vector3Int> ReadVector3IntList(string label);
 #endif
-
         T ReadEnum<T>(string label, T missingValue = default) where T : System.Enum;
         int[] ReadInt32Array(string label);
         uint[] ReadUInt32Array(string label);
@@ -167,6 +165,7 @@ namespace XDay
         List<float> ReadSingleList(string label);
         List<T> ReadList<T>(string label, System.Func<int, T> readListElement);
         T[] ReadArray<T>(string label, System.Func<int, T> readArrayElement);
+        Dictionary<K, V> ReadDictionary<K, V>(string label, System.Func<int, KeyValuePair<K, V>> readKeyValueFunc);
         void ReadStructure(string label, System.Action readFunc);
         T ReadSerializable<T>(string label, bool gameData) where T : class, ISerializable;
     }

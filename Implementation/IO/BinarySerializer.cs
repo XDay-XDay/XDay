@@ -223,6 +223,18 @@ namespace XDay
             }
         }
 
+        public void WriteDictionary<K, V>(Dictionary<K, V> values, string label, Action<K, V, int> writeKeyValueFunc)
+        {
+            int n = values == null ? 0 : values.Count;
+            m_Writer.Write(n);
+            var idx = 0;
+            foreach (var kv in values)
+            {
+                writeKeyValueFunc(kv.Key, kv.Value, idx);
+                ++idx;
+            }
+        }
+
         public void WriteList<T>(List<T> list, string label, System.Action<T, int> writeListElement)
         {
             int n = list == null ? 0 : list.Count;

@@ -288,6 +288,11 @@ namespace XDay
             m_Serializer.WriteUInt16Array(value, label);
         }
 
+        public void WriteDictionary<K, V>(Dictionary<K, V> values, string label, Action<K, V, int> writeKeyValueFunc)
+        {
+            m_Serializer.WriteDictionary(values, label, writeKeyValueFunc);
+        }
+
         private ISerializer m_Serializer;
         private string m_FilePath;
     }
